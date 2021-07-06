@@ -1,0 +1,35 @@
+# 配置eureka  server 注册中心
+eureka:
+  instance:
+    prefer-ip-address: true   # 是否使用ip地址来注册，就是eureka可视化上，显示的时ip
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+  client:
+#    单节点，下面两个关闭，集群下，要打开，默认都是打开
+    register-with-eureka: true  #将自己注册到注册中心 默认为 true
+    fetch-registry: true # 是否从注册中心拉取服务注册信息 ，默认为true
+    service-url:
+      defaultZone: http://127.0.0.1:8001/eureka/   #设置注册中心地址，集群使用逗号隔开
+    registry-fetch-interval-seconds: 10 # 从注册中心间隔多久拉取一次注册信息，默认30s
+
+# 使用httpclient ,
+# 两台服务器建立http连接过程很复杂，设计多个数据包交换，很耗时间
+# 一个http连接需要3次握手，4次挥手开销很大
+# 解决上述问题，可以使用http连接池，可以节约大量握手挥手，大大提升吞吐量
+# feign 默认使用的http客户端是jdk自带的HttpURLConnection这个无法使用池
+# 只要配置打开httpclient就会默认使用连接池，这个是apache的
+feign:
+  httpclient:
+    enabled: true
+
+ribbon:
+  ConnectTimeout: 5000   # 请求连接时间，默认时间为1s，
+  ReadTimeout: 5000      # 请求处理的时间
+
+spring:
+  zipkin:
+    base-url: http://localhost:9411/  # 服务端地址
+    sender:
+      type: web       # 数据传输方式，web代表以http报文的形式向服务端发送数据
+  sleuth:
+    sampler:
+      probability: 1.0  # 收集数据百分比 默认0.1（10%）
